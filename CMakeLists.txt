@@ -18,9 +18,10 @@ if (OPENMP_FOUND)
 endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${OPENGL32_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${OPENGL32_INCLUDE_DIRS} ${GLUT_INCLUDE_DIR})
 
 set( SB_SRCS
+    ReadWrite.cpp
     View.cpp
     GLView.cpp
     main.cpp
