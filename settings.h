@@ -18,17 +18,17 @@ namespace conf {
 	
 	const int CZ = 50; //cell size in pixels, for food squares. Should divide well into Width Height
 	const int MINFOOD = 0; //Minimum number of food cells which must have food durring simulation. 0 = off
-	const int INITFOOD = 3000; //initial number of full food cells
+	const int INITFOOD = WIDTH * HEIGHT / CZ / CZ / 100; //initial number of full food cells
 
 	const int REPORTS_PER_EPOCH = 10; // number of times to record data per epoch. 0 for off. (David Coleman)
 
-	const int NUMBOTS=30; //initially, and minimally
+	const int NUMBOTS = 4; //initially, and minimally
 	const float BOTRADIUS=10;
 	const float BOTSPEED= 0.3;
 	const float SPIKESPEED= 0.005; //how quickly can attack spike go up?
 	const float SPIKEMULT= 1; //essentially the strength of every spike impact
 	const float GRAVITYACCEL= 0.0098; //how fast a bot will fall after jumping [0= weightless (I don't recommend), 0.5 or more= super-gravity
-	const int BABIES=2; //number of babies per agent when they reproduce
+	const int BABIES=1; //number of babies per agent when they reproduce
 	const float BOOSTSIZEMULT=2; //how much boost do agents get? when boost neuron is on
 	const float REPRATE=7; //amount of food required to be consumed for an agent to reproduce
 	const float MAXMETABOLISM=4; //it is what it says. Metabolism is limited to [0,this]
@@ -43,16 +43,16 @@ namespace conf {
 	const float METAMUTRATE2= 0.01;
 	const float LEARNRATE= 0.0005; //how quickly a conn weight can change from use
 
-	const float FOODINTAKE= 0.002; //how much plant food an agent can consume per tick?
-	const float FOODGROWTH= -0.000001; //how much does food grow/decay on a cell which already has food?
+	const float FOODINTAKE= 0.02; //how much plant food an agent can consume per tick?
+	const float FOODGROWTH= 0.00001; //how much does food grow (decay for negative numbers) on a cell which already has food?
 	const float FOODWASTE= 0.12; //how much food disapears if agent eats?
-	const float FOODMAX= 0.5; //how much food per cell can there be at max?
-	const int FOODADDFREQ= 300; //how often does random square get to full food?
-	const float FOODSPREAD= 0.00004; //probability of a food cell seeding food to a nearby cell per tick
-	const int FOODRANGE= 2; //distance that single cell of food can seed. in cells.
+	const float FOODMAX= 0.6; //how much food per cell can there be at max?
+	const int FOODADDFREQ= 800; //how often does random square get to full food?
+	const float FOODSPREAD= 0.0003; //probability of a food cell seeding food to a nearby cell per tick
+	const int FOODRANGE= 1; //distance that single cell of food can seed. in cells.
 
 	const float MEATINTAKE= 0.01; //how much meat an agent can consume per tick?
-	const float MEATDECAY= 0.0000002; //how much meat decays/grows on a cell? through MEATDECAY/[meat_present]
+	const float MEATDECAY= 0.0000002; //how much meat decays (grows for negative numbers) on a cell? through MEATDECAY/[meat_present]
 	const float MEATWASTE= 0.2; //how much meat disapears if agent eats?
 	const float MEATMAX= 0.5; //how much meat per cell can there be at max?
 	const float MEATVALUE= 1; //how much meat a bot's body is worth? in range [0,1]
