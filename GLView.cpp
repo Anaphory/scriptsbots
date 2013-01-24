@@ -154,11 +154,27 @@ void GLView::processMousePassiveMotion(int x, int y)
 void GLView::menu(int key) //(GPA)
 {
 	ReadWrite* savehelper= new ReadWrite(); //for loading/saving
-	if (key == 27)
-		exit(0);
-	else if (key==9) { //[tab] reset
-		world->reset();
-		printf("Agents reset\n");
+	if (key == 27) {
+	  unsigned long int time_now = std::time(0);
+	  char filename[40]; // enough to hold all numbers up to 64-bits
+	  sprintf(filename, "W%d.bots", time_now);
+	  printf("AUTOSAVING WORLD TO %s\n", filename);
+	  savehelper->saveWorld(world, xtranslate, ytranslate, filename);
+	  exit(0);
+	} else if (key=='q') {
+	  unsigned long int time_now = std::time(0);
+	  char filename[40]; // enough to hold all numbers up to 64-bits
+	  sprintf(filename, "W%d.bots", time_now);
+	  printf("QUICKSAVING WORLD TO %s\n", filename);
+	  savehelper->saveWorld(world, xtranslate, ytranslate, filename);
+	} else if (key=='0') {
+	  unsigned long int time_now = std::time(0);
+	  char filename[40]; // enough to hold all numbers up to 64-bits
+	  sprintf(filename, "W%d.bots", time_now);
+	  printf("AUTOSAVING WORLD TO %s\n", filename);
+	  savehelper->saveWorld(world, xtranslate, ytranslate, filename);
+	  world->reset();
+	  printf("Agents reset\n");
 	} else if (key=='p') {
 		//pause
 		paused= !paused;
@@ -168,8 +184,8 @@ void GLView::menu(int key) //(GPA)
 		skipdraw++;
 	} else if (key==45) { //-
 		skipdraw--;
-	} else if (key=='l' || key=='k') { //layer switch; l= "next", k= "previous"
-		if (key=='l') layer++;
+	} else if (key=='n' || key=='r') { //layer switch; n= "next", r= "previous"
+		if (key=='n') layer++;
 		else layer--;
 		if (layer>LAYERS) layer= 0;
 		if (layer<0) layer= LAYERS;
@@ -182,13 +198,13 @@ void GLView::menu(int key) //(GPA)
 		else if (layer==LAYERS) glutChangeToMenuEntry(2, "Show: None", 'l');
 		else glutChangeToMenuEntry(2, "Show: next layer",'l');
 		glutSetMenu(m_id);
-	} else if (key==1002) {
+	} else if (key=='x') {
 		world->addRandomBots(5);
-	} else if (key==1003) {
-		world->addRandomBots(5, 2);
-	} else if (key==1004) {
-		world->addRandomBots(5, 1);
 	} else if (key=='c') {
+		world->addRandomBots(5, 2);
+	} else if (key=='v') {
+		world->addRandomBots(5, 1);
+	} else if (key==9) { //[tab] toggles closed/open world
 		world->setClosed( !world->isClosed() );
 		glutGet(GLUT_MENU_NUM_ITEMS);
 		if (world->isClosed()) glutChangeToMenuEntry(4, "Open World", 'c');
@@ -208,48 +224,48 @@ void GLView::menu(int key) //(GPA)
 		else following= 0;
 	}else if (key==127) { //delete
 		world->deleting= 1;
-	}else if (key==62) { //zoom+ >
+	}else if (key=='>') { //zoom+ >
 		scalemult += 0.012;
 		if(scalemult<0.01) scalemult=0.01;
-	}else if (key==60) { //zoom- <
+	}else if (key=='<') { //zoom- <
 		scalemult -= 0.012;
 	}else if (key==32) { //spacebar input [pressed]
 		world->pinput1= 1;
-	}else if (key==119) { //w (move faster)
+	}else if (key=='l') { //l (move faster)
 		world->pcontrol= true;
 		world->pleft= cap(world->pleft + 0.08);
 		world->pright= cap(world->pright + 0.08);
-	}else if (key==97) { //a (turn left)
+	}else if (key=='i') { //i (turn left)
 		world->pcontrol= true;
 		world->pleft= cap(world->pleft - 0.05 + (world->pright-world->pleft)*0.05); //this extra code helps with turning out of tight circles
 		world->pright= cap(world->pright + 0.05 + (world->pleft-world->pright)*0.05);
-	}else if (key==115) { //s (move slower)
+	}else if (key=='a') { //a (move slower)
 		world->pcontrol= true;
 		world->pleft= cap(world->pleft - 0.08);
 		world->pright= cap(world->pright - 0.08);
-	}else if (key==100) { //d (turn right)
+	}else if (key=='e') { //e (turn right)
 		world->pcontrol= true;
 		world->pleft= cap(world->pleft + 0.05 + (world->pright-world->pleft)*0.05);
 		world->pright= cap(world->pright - 0.05 + (world->pleft-world->pright)*0.05);
-	} else if (key==999) { //player control
+	} else if (key==228) { //ä (toggle player control)
 		world->setControl(!world->pcontrol);
 		glutGet(GLUT_MENU_NUM_ITEMS);
 		if (world->pcontrol) glutChangeToMenuEntry(5, "Release Agent", 999);
 		else glutChangeToMenuEntry(5, "Control Agent", 999);
 		glutSetMenu(m_id);
-	}else if (key==1000) { //menu only, save world
+	}else if (key=='s') { //s (save world)
 		printf("SAVING WORLD\n");
-		printf("Type a valid file name (ex: WORLD.SCB): ");
+		printf("Type a valid file name (ex: world.bots): ");
 		scanf("%s", filename);
 		savehelper->saveWorld(world, xtranslate, ytranslate, filename);
-	}else if (key==1001) { //menu only, load world
+	}else if (key=='k') { //k (load world)
 		printf("LOADING WORLD\n");
-		printf("Type a valid file name (ex: WORLD.SCB): ");
+		printf("Type a valid file name (ex: world.bots): ");
 		scanf("%s", filename);
 		//reset first
 		world->reset();
 		savehelper->loadWorld(world, xtranslate, ytranslate, filename);
-	}else if (key==1005) { //menu only, debug mode
+	}else if (key=='d') { //menu only, debug mode
 		world->setDebug( !world->isDebug() );
 		glutGet(GLUT_MENU_NUM_ITEMS);
 		if (world->isDebug()){
