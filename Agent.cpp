@@ -15,7 +15,8 @@ Agent::Agent()
 	//randomly spawned bots get the following attributes:
 	pos= Vector2f(randf(0,conf::WIDTH),randf(0,conf::HEIGHT));
 	angle= randf(-M_PI,M_PI);
-	health= 0.5+randf(0,0.5);
+	health= 0.65;
+	max_health= health;
 	age=0;
 	species=randi(-10,10);
 	spikeLength=0;
@@ -40,7 +41,8 @@ Agent::Agent()
 	hybrid= false;
 	herbivore= randf(0,1);
 	repcounter= conf::REPRATE;
-	metabolism= randf(0.2,conf::MAXMETABOLISM);
+	metabolism= 1; //randf(0.2,conf::MAXMETABOLISM);
+	// If a low metabolism has no advantage, why bother?
 
 	id=0;
 	
@@ -104,7 +106,8 @@ Agent Agent::reproduce(Agent that, float MR, float MR2)
 
 	//basic trait inheritance
 	a2.gencount= max(this->gencount+1,that.gencount+1);
-	a2.metabolism= randf(0,1)<0.5 ? this->metabolism : that.metabolism;
+	a2.metabolism= 1; //randf(0,1)<0.5 ? this->metabolism : that.metabolism;
+	// If a low metabolism has no advantage, why bother?
 	a2.herbivore= randf(0,1)<0.5 ? this->herbivore : that.herbivore;
 	a2.species= randf(0,1)<0.5 ? this->species : that.species;
 
@@ -125,9 +128,12 @@ Agent Agent::reproduce(Agent that, float MR, float MR2)
 	a2.eyedir = randf(0,1)<0.5 ? this->eyedir : that.eyedir;
 
 	//mutations
-	if (randf(0,1)<MR/2) a2.metabolism= randn(a2.metabolism, MR2);
-	if (a2.metabolism<0) a2.metabolism= 0; //not going to bother limiting to 0.1; if it can survive, I don't even care if it's 0.000...1
-	if (a2.metabolism>conf::MAXMETABOLISM) a2.metabolism= conf::MAXMETABOLISM;
+
+	// If a low metabolism has no advantage, why bother?
+	//if (randf(0,1)<MR/2) a2.metabolism= randn(a2.metabolism, MR2);
+	//if (a2.metabolism<0) a2.metabolism= 0; //not going to bother limiting to 0.1; if it can survive, I don't even care if it's 0.000...1
+	//if (a2.metabolism>conf::MAXMETABOLISM) a2.metabolism= conf::MAXMETABOLISM;
+
 	if (randf(0,1)<MR) a2.herbivore= cap(randn(a2.herbivore, MR2));
 	if (randf(0,1)<MR*20) a2.species= (int) randn(a2.species, 100*MR2);
 

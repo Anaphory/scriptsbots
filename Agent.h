@@ -25,6 +25,8 @@ public:
     Vector2f pos;
 
     float health; //in [0,2]. I cant remember why.
+    float max_health; //in [0,2]. Maximum health so far.
+                      //(Replaces AgeMult)
     float angle; //of the bot
     
     float red;
