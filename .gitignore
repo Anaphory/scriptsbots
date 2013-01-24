@@ -8,6 +8,8 @@ build/
 *.lib
 *.vcproj
 
+*.core
+
 # Files Scriptbots writes
 *.SCB
 *.scb
