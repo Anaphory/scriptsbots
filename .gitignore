@@ -4,8 +4,12 @@
 Debug/
 Release/
 build/
-*.SCB
 *.dll
 *.lib
 *.vcproj
+
+# Files Scriptbots writes
+*.SCB
+*.scb
+*.bots
 report.txt
