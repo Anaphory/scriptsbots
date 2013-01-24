@@ -91,16 +91,11 @@ void World::update()
 			cells[0][cx][cy]= capCell(cells[0][cx][cy], conf::FOODMAX); //cap food at FOODMAX
 
 			//meat = cells[1]...
-			if (cells[1][cx][cy]>0 && cells[1][cx][cy]<=conf::MEATMAX) {
-				cells[1][cx][cy] -= conf::MEATDECAY/cells[1][cx][cy]; //meat decays exponentially
-			}
+			cells[1][cx][cy] -= conf::MEATDECAY;
 			cells[1][cx][cy]= capCell(cells[1][cx][cy], conf::MEATMAX); //cap at MEATMAX
 
 			//hazard = cells[2]...
 			cells[2][cx][cy]-= conf::HAZARDDECAY; //hazard decays
-			if (cells[2][cx][cy]>conf::HAZARDMAX*9/10 && randf(0,1)<0.125){
-				cells[2][cx][cy]= 0; //instant hazards (and really polluted cells... fix?) will be reset to zero
-			}
 			cells[2][cx][cy]= capCell(cells[2][cx][cy], conf::HAZARDMAX); //cap at HAZARDMAX
 		}
 	}
@@ -128,26 +123,27 @@ void World::update()
 	//process bots:
 
 	for (int i=0;i<agents.size();i++) {
-		//health and deaths
-		float baseloss= 0.00001*(abs(agents[i].w1) + abs(agents[i].w2))/2;
+	  //health and deaths
+	  float loss = conf::WHEELLOSS*(abs(agents[i].w1) + abs(agents[i].w2))/2;
+	  if (agents[i].boost) { 
+	    //if boosting, init wheelloss is multiplied
+	    loss *= conf::BOOSTSIZEMULT*1.2;
+	  }
+	  loss += conf::BASELOSS;
 
-		baseloss += agents[i].age/conf::MAXAGE*conf::AGEDAMAGE; //getting older reduces health.
 
-		if (agents[i].boost) { //if boosting, init baseloss + age loss is multiplied
-			baseloss *= conf::BOOSTSIZEMULT*1.2;
-		}
+	  //getting older reduces health.
+	  loss += agents[i].age/conf::MAXAGE*conf::AGEDAMAGE;
 
-		//process temperature preferences
-		//calculate temperature at the agents spot. (based on distance from horizontal equator)
-		float dd= 2.0*abs(agents[i].pos.y/conf::HEIGHT - 0.5);
-		float discomfort= sqrt(abs(dd-agents[i].temperature_preference));
-		if (discomfort<0.08) discomfort=0;
-		baseloss += conf::TEMPERATURE_DISCOMFORT*discomfort; //add to baseloss
-
-		//baseloss then gets multiplied by metabolism
-//		baseloss *= agents[i].metabolism;
-
-		agents[i].health -= baseloss;
+	  //process temperature preferences
+	  //calculate temperature at the agents spot.
+	  //(based on distance from horizontal equator)
+	  float dd= 2.0*abs(agents[i].pos.y/conf::HEIGHT - 0.5);
+	  float discomfort= sqrt(abs(dd-agents[i].temperature_preference));
+	  if (discomfort<0.08) discomfort=0;
+	  loss += conf::TEMPERATURE_DISCOMFORT*discomfort; //add to loss
+	  
+	  agents[i].health -= loss;
 	}
 	
 	for (int i=0;i<agents.size();i++) {
@@ -161,10 +157,10 @@ void World::update()
 					//this adds conf::BABIES new agents to agents[], but with two parents
 					reproduce(i, j, agents[i].MUTRATE1, agents[i].MUTRATE2, agents[j].MUTRATE1, agents[j].MUTRATE2);
 					agents[i].health -= 0.3; //reduce health of birthing parent; not as much as assexual reproduction
-					agents[i].repcounter= conf::REPRATE;
-					agents[j].repcounter= conf::REPRATE;
+					agents[i].repcounter= conf::REPRATE/1.5;
+					agents[j].repcounter= conf::REPRATE/1.5;
 					break;
-				} else if (j==agents.size()-1 && agents[i].repcounter!=conf::REPRATE && agents[i].give<=0.5 && randf(0,1)<0.01){
+				} else if (j==agents.size()-1 && agents[i].repcounter!=conf::REPRATE && randf(0,1)<0.01){
 					//this adds conf::BABIES new agents to agents[], with just one parent
 					reproduce(i, i, agents[i].MUTRATE1, agents[i].MUTRATE2, agents[i].MUTRATE1, agents[i].MUTRATE2);
 					agents[i].health -= 0.65; //reduce health of birthing parent
@@ -183,14 +179,15 @@ void World::update()
 			cy= (int) agents[i].pos.y/conf::CZ;
 
 			float meat= cells[1][cx][cy];
-			float agemult= 1.0;
+			float agemult=agents[i].max_health;
 			float spikedmult= 0.75;
 			float stomachmult= (agents[i].herbivore+1)/2; //herbivores give 100%, while carnivores give 50%
-			if(agents[i].age<10) agemult= agents[i].age*0.1; //young killed agents should give very little resources until age 10
-			if(agents[i].spiked) spikedmult= 1; //agents which were spiked will give even more meat to the table
-
-			meat+= conf::MEATVALUE*conf::MEATMAX*agemult*spikedmult*stomachmult;
+			float add_meat = conf::MEATVALUE*agemult*spikedmult*stomachmult;
+			//printf("Agent %d died for %f (%f*%f*%f*%f) meat in cell %d,%d\n", i, add_meat, conf::MEATVALUE, agemult, spikedmult, stomachmult, cx, cy);
+			meat += add_meat;
 			cells[1][cx][cy]= capCell(meat,conf::MEATMAX);
+		} else if (agents[i].health>agents[i].max_health) { 
+		  agents[i].max_health = agents[i].health;
 		}
 	}
 
@@ -206,12 +203,12 @@ void World::update()
 		}
 	}
 
-	//add new agents, if environment isn't closed
+	//add new agents, if environment isn't closed or too few anyway
+	while (agents.size()<conf::NUMBOTS) {
+	  addRandomBots(1);
+	}
 	if (!CLOSED) {
 		//make sure environment is always populated with at least NUMBOTS bots
-		while (agents.size()<conf::NUMBOTS) {
-			addRandomBots(1);
-		}
 		if (modcounter%200==0) {
 			if (randf(0,1)<0.5){
 				addRandomBots(1); //every now and then add random bots in
